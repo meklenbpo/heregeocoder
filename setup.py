@@ -11,5 +11,6 @@ setup(
     description='Get point address from X/Y and vice versa',
     packages=find_packages(),
     install_requires=[
+        'requests',
     ]
 )
