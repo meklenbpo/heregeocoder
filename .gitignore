@@ -5,3 +5,6 @@
 __pycache__
 *.pyc
 venv
+
+# Sensitive
+here_geocoder_credentials.py
