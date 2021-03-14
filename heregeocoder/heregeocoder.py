@@ -106,5 +106,5 @@ def address_to_xy(address: str) -> tuple:
         )
     except (IndexError, KeyError):
         raise UnexpectedResponseError
-    x, y = coords['long'], coords['lat']
+    x, y = coords['lng'], coords['lat']
     return x, y
