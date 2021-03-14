@@ -89,31 +89,22 @@ def xy_to_address(long_x: float, lat_y: float) -> tuple:
     return result['text'], result['kind'], result['precision']
 
 
-# STUB
 def address_to_xy(address: str) -> tuple:
-    """Query Yandex for coordinates of an address (in Russia).
+    """Query HERE for coordinates of an address.
 
     Return a tuple of floats, first being X (Longitude) and second
     being Y (Latitude).
     """
     request_params = _form_a_direct_request(address)
     r = requests.get(**request_params)
+    if r.status_code != 200:
+        raise ServiceError(f'{r.status_code}')    
     response = r.json()
-    if 'error' in response:
-        error = response['error']
-        message = response['message']
-        raise ServiceError(f'{error} / {message}')    
     try:
         coords = (
-            response['response']['GeoObjectCollection']['featureMember']
-            [0]['GeoObject']['Point']['pos']
+            response['items'][0]['position']
         )
     except (IndexError, KeyError):
         raise UnexpectedResponseError
-    x_str, y_str = coords.split(' ')
-    try:
-        x = float(x_str)
-        y = float(y_str)
-    except ValueError:
-        raise UnexpectedResponseError
+    x, y = coords['long'], coords['lat']
     return x, y
