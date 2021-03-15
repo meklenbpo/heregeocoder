@@ -34,6 +34,7 @@ def _form_a_direct_request(address: str) -> dict:
 
     Return a dictionary that can be unpacked into the requests.get().
     """
+    URL = 'https://geocode.search.hereapi.com/v1/geocode'
     return {
         'url': URL,
         'params': {
@@ -51,7 +52,8 @@ def _form_a_reverse_request(long_x: float, lat_y: float) -> dict:
 
     Return a dictionary that can be unpacked into the requests.get().
     """
-    coord_str = f'{lat_y:.5f}, {long_x:.5f}'
+    URL = 'https://geocode.search.hereapi.com/v1/revgeocode'
+    coord_str = f'{lat_y:.5f},{long_x:.5f}'
     return {
         'url': URL,
         'params': {
@@ -63,7 +65,6 @@ def _form_a_reverse_request(long_x: float, lat_y: float) -> dict:
     }
 
 
-# STUB
 def xy_to_address(long_x: float, lat_y: float) -> tuple:
     """Query HERE for an address given a pair of XY coordinates.
 
@@ -74,19 +75,16 @@ def xy_to_address(long_x: float, lat_y: float) -> tuple:
     """
     request_params = _form_a_reverse_request(long_x, lat_y)
     r = requests.get(**request_params)
+    if r.status_code != 200:
+        raise ServiceError(f'{r.status_code}') 
     response = r.json()
-    if 'error' in response:
-        error = response['error']
-        message = response['message']
-        raise ServiceError(f'{error} / {message}') 
     try:
-        result = (
-            response['response']['GeoObjectCollection']['featureMember']
-            [0]['GeoObject']['metaDataProperty']['GeocoderMetaData']
-        )
+        a_d = response['items'][0]['address']
+        address = ', '.join((a_d['county'], a_d['city'], a_d['district'],
+                            a_d['street'], a_d['houseNumber']))
     except (IndexError, KeyError):
         raise UnexpectedResponseError
-    return result['text'], result['kind'], result['precision']
+    return address
 
 
 def address_to_xy(address: str) -> tuple:
