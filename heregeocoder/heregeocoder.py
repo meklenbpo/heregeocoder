@@ -95,6 +95,7 @@ def address_to_xy(address: str) -> tuple:
     """
     request_params = _form_a_direct_request(address)
     r = requests.get(**request_params)
+    print(r.url)  # DEBUG
     if r.status_code != 200:
         raise ServiceError(f'{r.status_code}')    
     response = r.json()
